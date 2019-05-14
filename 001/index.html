@@ -1,0 +1,85 @@
+<style>
+html, body {
+  margin: 0; padding: 0;
+  width: 100vw;
+  height: 100vh;
+}
+portal {
+    top: 0;
+    left: 0;
+    width: 85px;
+    height: 100px;
+    position: relative;
+    transition: width 0.5s,
+        height 0.5s,
+        top 0.5s,
+        left 0.5s;
+}
+.portal-reveal {
+  top: -100px;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+</style>
+<a href='http://localhost:8000/index.html' class='portal-wrapper'>
+</a>
+<canvas style='top: 200px; position: relative;' height=1000 width=1600></canvas>
+
+<script>
+(() => {
+
+  // making noise on canvas via https://stackoverflow.com/a/22003901
+  // to become heavy rendering 
+  var c = document.querySelector('canvas');
+  var ctx = c.getContext("2d", {alpha: true});       // context without alpha channel.
+  var idata = ctx.createImageData(c.width, c.height); // create image data
+  var buffer32 = new Uint32Array(idata.data.buffer);  // get 32-bit view
+
+  (function loop() {
+    noise(ctx);
+    requestAnimationFrame(loop)
+  })()
+
+  function noise(ctx) {
+    var len = buffer32.length - 1;
+    while(len--) buffer32[len] = Math.random() < 0.5 ? 0 : -1>>0;
+    ctx.putImageData(idata, 0, 0);
+  }
+
+  
+  document.body.style.background = `
+  rgb(
+    ${Math.floor(Math.random() * 255)},
+    ${Math.floor(Math.random() * 255)},
+    ${Math.floor(Math.random() * 255)}
+  )
+  `
+  
+
+const injectPortal = () => {
+  const wrapper = document.querySelector('a');
+  const portalElement = document.createElement('portal')
+
+  portalElement.src = location.href;
+
+  wrapper.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.setTimeout(() => portalElement.classList.add('portal-reveal'), 1500);
+
+    portalElement.addEventListener('transitionend', (event) => {
+        if (event.propertyName === 'width') {
+            portalElement.activate();
+        }
+    });
+  })
+  wrapper.appendChild(portalElement);
+  wrapper.appendChild(document.createTextNode('Activate'));
+};
+if (portalHost) {
+  window.addEventListener('portalactivate', injectPortal)
+} else {
+  injectPortal()
+}
+})();
+</script>
