@@ -28,6 +28,8 @@ portal {
 
 <script>
 (() => {
+  
+  if (!('HTMLPortalElement' in window)) return window.alert('This browser doesn\'t support Portals')
 
   // making noise on canvas via https://stackoverflow.com/a/22003901
   // to become heavy rendering 
